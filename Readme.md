@@ -1,23 +1,35 @@
-# Mission 2
+# Mission 3
 
-## Part 0
+## Part 0, Part 2, Part 2
 
-https://247oxh.buildship.run/mission2
 
-## Part1
 
-- Зачем нужен ssh? 
-> SSH (Secure Shell) — это сетевой протокол, который нужен для безопасного подключения к удалённым серверам и управления ими. SSH шифрует передаваемые данные,  предоставляет доступ к удалённому серверу или компьютеру через терминал. SSH поддерживает аутентификацию с использованием ключей -  безопаснее, чем простые пароли. И через него можно запускать команды на удалённом сервере.
+## Part3
 
-- Предположим, у вас есть прямой доступ к серверу(терминалу) под управлением ubuntu. У вас есть коллега Вася, который хочет получить доступ к этому серверу. Он генерирует пару ssh ключей с помощью команды ssh-keygen и дает вам свой публичный ключ. В какой файл на сервере нужно записать ключ, чтобы Вася смог подключиться к терминалу сервера?
-> ~/.ssh/authorized_keys
+- Query 1 - usernames
+> select username 
+from "Users"
 
-- Тут вопрос про АПИ. Разберитесь, что такое long polling и webhooks, опишите сами в нескольких предложениях, как они работают.
-> Long Polling - метод, при использовании которого сервер постоянно запрашивает API телеграма на наличие новых данных. Бот отправляет запрос и ожидает ответа. Если новых данных нет, соединение остаётся открытым до тех пор, пока не появится обновление или не истечёт время ожидания. После получения обновления бот сразу делает новый запрос.
-Webhooks - метод, где вместо постоянных запросов бот указывает API, куда отправлять обновления по мере их поступления. Когда происходит какое-то событие, API отправляет обновление на заданный URL.
+- Query 2 - username - number of sent massages
+> SELECT u.username, COUNT(u.id) AS number_of_sent_messages
+FROM "Users" u
+LEFT JOIN "Messages" m ON u.id = m.from
+GROUP BY u.username;
 
-- Найдите информацию, что такое issues на гитхабе и для чего нужны. Также вставьте ссылки на пару примеров issues в популярных open source проектах.
-> GitHub Issues — это элементы, которые можно создать в репозитории для планирования, обсуждения и отслеживания работы. Они позволяют разработчикам открывать обсуждения, связанные с проблемами, улучшениями или новыми функциями репозитория. issue включает заголовок, описание, метки и комментарии.https://github.com/facebook/react/issues , https://github.com/nextcloud/server/issues/36671
+- Query 3 - username - number of received messages
+> SELECT u.username, COUNT(m.id) AS number_of_received_messages
+FROM "Users" u
+JOIN "Messages" m ON u.id = m.to
+GROUP BY u.username
+ORDER BY number_of_received_messages DESC
+LIMIT 1;
 
-- Ваш проект используется пустую папку images, но гит не поддерживает отслеживание пустых директорий. Что делать?
-> Существует распространенная практика добавления пустого фиктивного файла .gitkeep (но название может быть любым).
+- Query 4 - username - average number of sent massages
+> SELECT AVG(sent_messages) AS avg_sent_messages
+FROM (
+    SELECT COUNT(m.id) AS sent_messages
+    FROM "Users" u
+    LEFT JOIN "Messages" m ON u.id = m.from
+    GROUP BY u.id
+) AS message_counts;
+
